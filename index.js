@@ -149,6 +149,76 @@ console.log('Improvements', improvementsArray);
 return improvementsArray;
 
 }
+
+async function optionalSections() {
+           const optional = [
+            {
+                type:'confirm',
+                message: 'Would you like to add a table of contents?',
+                name: 'tableOfContents',
+            },
+            {
+                type:'confirm',
+                message: 'Would you like to add an installation guide?',
+                name: 'installation',
+            },
+            {
+                type:'confirm',
+                message: 'Would you like to add any badges?',
+                name: 'badges',
+            }, 
+            {
+                type:'confirm',
+                message: 'Would you like to explain how to contribute?',
+                name: 'contribution',
+            },
+        ];
+
+        const optionalAnswers = await inquirer.prompt(optional);
+        
+        if (optionalAnswers.installation) {
+            const installationText = await inquirer.prompt([
+                {
+                    type: 'input',
+                    message: 'Please provide installation instructions:',
+                    name: 'installationText',
+                },
+            ]);
+        
+            optionalAnswers.installationText = installationText.installationText;
+        }
+    
+        if (optionalAnswers.badges) {
+            const badgeInput = await inquirer.prompt([
+                {
+                    type: 'input',
+                    message: 'Please provide badges:',
+                    name: 'badgeInput',
+                },
+            ]);
+            optionalAnswers.badgeInput = badgeInput.badgeInput;
+        }
+       
+        if (optionalAnswers.contribution) {
+            const contributionText = await inquirer.prompt([
+                {
+                    type: 'input',
+                    message: 'Please explain how people can contribute to this project',
+                    name: 'contributionText',
+                },
+            ]);
+            optionalAnswers.contributionText = contributionText.contributionText;
+        }
+        
+
+        return optionalAnswers;
+        
+        
+        //return [answers];
+    }
+
+    // return ask();
+
 async function run() {
     const mainAnswers = await mainPrompt();
     console.log('Main Answers:', mainAnswers);
@@ -156,20 +226,59 @@ async function run() {
     const whenThenAnswers = await repeatPrompt();
     const improvementAnswers = await bulletPoints();
     const addSources = await credits();
+    const optionalAnswers = await optionalSections();
 
-    const readmeContent = generateREADME(mainAnswers, whenThenAnswers, improvementAnswers, addSources);
+    const readmeContent = generateREADME(mainAnswers, whenThenAnswers, improvementAnswers, addSources, optionalAnswers);
     fs.writeFile('README.md', readmeContent, (err) =>
     err ? console.log(err): console.log('Success')
     );
+
+
+
 }
 
-const generateREADME = ({ projectName, purpose, reason, because, action, acceptanceCriteria, description, link, usage}, whenThenAnswers, improvementAnswers, addSources) =>
+const generateREADME = ({ projectName, purpose, reason, because, action, acceptanceCriteria, description, link, usage}, whenThenAnswers, improvementAnswers, addSources, optionalAnswers) => {
+// let tableOfContentsSection = '';
+//     // if (optionalAnswers && optionalAnswers.tableOfContents) {
+//     //     tableOfContentsSection = '\n## Table of Contents\n';
+//     //     // Add your table of contents content here
+//     // }
 
-`# ${projectName}
+    let installationSection = '';
+    if (optionalAnswers.installationText) {
+        installationSection = `\n
+## Installation
+
+${optionalAnswers.installationText}`;
+    }
+    
+    let badgeSection = '';
+    if (optionalAnswers.badgeInput) {
+        badgeSection = `\n
+## Badges
+
+${optionalAnswers.badgeInput}`;
+    }
+    
+    let contributionSection = '';
+    if (optionalAnswers.contributionText) {
+        contributionSection = `\n
+## Installation
+
+${optionalAnswers.contributionText}`;
+    }
+
+    return `# ${projectName}
 
 ## Your Task
 
-The purpose of the repository is to ${purpose} 
+The purpose of the repository is to ${purpose}
+
+## Description
+
+${description}
+
+## Table of Contents
 
 ## User Story
 
@@ -186,10 +295,6 @@ GIVEN ${acceptanceCriteria}
 ${whenThenAnswers.map(answers => `WHEN ${answers.when}\nTHEN ${answers.then}`).join('\n')}
 \`\`\`
 
-## Description
-
-${description}
-
 ## Future Implementations
 
 ${improvementAnswers.map(answers => answers.improvements).join('\n')}
@@ -197,6 +302,13 @@ ${improvementAnswers.map(answers => answers.improvements).join('\n')}
 ## Access
 
 To access this site, please visit: ${link}
+
+
+${installationSection}${badgeSection}${contributionSection}
+
+
+## Features
+
 
 ## Usage
 
@@ -209,5 +321,7 @@ With thanks to:
 ${addSources.map(source => source.credit).join('\n')}
 
 ## License`;
+
+};
 
 run();
