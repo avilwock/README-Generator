@@ -11,6 +11,11 @@ async function mainPrompt() {
         name: 'projectName',
     },
     {
+        type:'input',
+        message: 'Give a description of your project',
+        name: 'description',
+    },
+    {
         type: 'input',
         message: 'What is the project challenge?',
         name: 'task',
@@ -36,11 +41,6 @@ async function mainPrompt() {
         name: 'acceptanceCriteria',
     }, 
     {
-        type:'input',
-        message: 'Give a description of your project',
-        name: 'description',
-    },
-    {
         type: 'input',
         message: 'Please add a link to your repository',
         name: 'link',
@@ -49,11 +49,6 @@ async function mainPrompt() {
         type: 'input',
         message: 'How do you use this program?',
         name: 'usage',
-    },
-    {
-        type: 'confirm',
-        message: 'Would you like to add a table of contents?',
-        name: 'tableOfContents',
     },
     {
         type: 'confirm',
@@ -79,7 +74,12 @@ async function mainPrompt() {
         type:'confirm',
         message: 'Would you like to include a feature section?',
         name: 'feature',
-    }
+    },
+    {
+        type: 'confirm',
+        message: 'Would you like to add a table of contents?',
+        name: 'tableOfContents',
+    },
     
 ];
 
@@ -87,11 +87,6 @@ async function mainPrompt() {
 
     if (mainAnswers.tableOfContents) {
         const tableOfContentsText = await inquirer.prompt([
-            {
-                type: 'input',
-                message: 'Please provide table of contents:',
-                name: 'tableOfContentsText',
-            },
         ]);
         mainAnswers.tableOfContentsText = tableOfContentsText.tableOfContentsText;
     }
@@ -144,7 +139,7 @@ async function mainPrompt() {
         const featureText = await inquirer.prompt([
             {
                 type: 'input',
-                message: 'Please enter the license you are using',
+                message: 'Please add any additional features',
                 name: 'featureText',
             },
         ])
@@ -293,15 +288,20 @@ const generateREADME = ({ projectName, task, reason, because, action, acceptance
         licenseSection = `\n## License\n\n${mainAnswers.licenseText || ''}`;
     }
 
+    let featureSection = '';
+    if (mainAnswers.feature) {
+        featureSection = `\n## Feature\n\nAdditional Features: ${feature || ''}`;
+    }
+
     const descriptionSection = `\n## Description\n\n${description}`;
     
     const acceptanceSection = `## Acceptance Criteria\n\n\`\`\`\nGIVEN ${acceptanceCriteria}\n${whenThenAnswers.map(answers => `WHEN ${answers.when}\nTHEN ${answers.then}`).join('\n')}\n\`\`\``;
 
-    const futureSection = `## Future Implementations\n\n${improvementAnswers.map(answers => answers.improvements).join('\n')}`;
+    const futureSection = `## Future Implementations\n\n${improvementAnswers.map(answers => answers.improvements).join('')}`;
 
-    const accessSection = `## Access\n\nTo access this site, please visit: [${projectName}](${link})`;
+    const accessSection = `## Access\n\nTo access this site, please visit: ${link}`;
 
-    const featureSection = `## Feature\n\nAdditional Features: ${feature}`;
+   // const featureSection = `## Feature\n\nAdditional Features: ${feature}`;
     
     const usageSection = `## Usage\n\nTo use this repository: ${usage}`;
     
