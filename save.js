@@ -1,8 +1,6 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 
-let mainAnswers;
-
 async function mainPrompt() {
     const mainPrompt = [
     {
@@ -12,8 +10,8 @@ async function mainPrompt() {
     },
     {
         type: 'input',
-        message: 'What is the project challenge?',
-        name: 'task',
+        message: 'The purpose of this repository is to ',
+        name: 'purpose',
     },
     {
         type: 'input',
@@ -75,26 +73,10 @@ async function mainPrompt() {
         message: 'Would you like to include a license?',
         name: 'license',
     },
-    {
-        type:'confirm',
-        message: 'Would you like to include a feature section?',
-        name: 'feature',
-    }
     
 ];
 
-    mainAnswers = await inquirer.prompt(mainPrompt);
-
-    if (mainAnswers.tableOfContents) {
-        const tableOfContentsText = await inquirer.prompt([
-            {
-                type: 'input',
-                message: 'Please provide table of contents:',
-                name: 'tableOfContentsText',
-            },
-        ]);
-        mainAnswers.tableOfContentsText = tableOfContentsText.tableOfContentsText;
-    }
+const mainAnswers = await inquirer.prompt(mainPrompt)};
 
     if (mainAnswers.installation) {
         const installationText = await inquirer.prompt([
@@ -140,20 +122,7 @@ async function mainPrompt() {
         mainAnswers.licenseText = licenseText.licenseText;
     }
 
-    if (mainAnswers.feature) {
-        const featureText = await inquirer.prompt([
-            {
-                type: 'input',
-                message: 'Please enter the license you are using',
-                name: 'featureText',
-            },
-        ])
-        mainAnswers.featureText = featureText.featureText;
-    }
-
     return mainAnswers;
-
-}
 
 async function repeatPrompt() {
     const answersArray = [];
@@ -269,11 +238,11 @@ async function run() {
     );
 
 }
- run();
 
-const generateREADME = ({ projectName, task, reason, because, action, acceptanceCriteria, description, link, usage, tableOfContentsText, feature}, whenThenAnswers, improvementAnswers, addSources) => {
 
-      let installationSection = '';
+const generateREADME = ({ projectName, purpose, reason, because, action, acceptanceCriteria, description, link, usage}, whenThenAnswers, improvementAnswers, addSources) => {
+
+    let installationSection = '';
     if (mainAnswers.installationText) {
         installationSection = `\n## Installation\n\n${mainAnswers.installationText || ''}`;
     }
@@ -293,44 +262,17 @@ const generateREADME = ({ projectName, task, reason, because, action, acceptance
         licenseSection = `\n## License\n\n${mainAnswers.licenseText || ''}`;
     }
 
-    const descriptionSection = `\n## Description\n\n${description}`;
-    
-    const acceptanceSection = `## Acceptance Criteria\n\n\`\`\`\nGIVEN ${acceptanceCriteria}\n${whenThenAnswers.map(answers => `WHEN ${answers.when}\nTHEN ${answers.then}`).join('\n')}\n\`\`\``;
-
-    const futureSection = `## Future Implementations\n\n${improvementAnswers.map(answers => answers.improvements).join('\n')}`;
-
-    const accessSection = `## Access\n\nTo access this site, please visit: [${projectName}](${link})`;
-
-    const featureSection = `## Feature\n\nAdditional Features: ${feature}`;
-    
-    const usageSection = `## Usage\n\nTo use this repository: ${usage}`;
-    
-    const creditsSection = `## Credits\n\nWith thanks to:\n\n${addSources.map(source => source.credit).join('\n')}`;
-
-    let links = [];
-    if (tableOfContentsText) {
-        links = links.concat(tableOfContentsText.split('\n').map(line => line.trim()));
-    }
-
-    links.push('User Story', 'Acceptance Criteria', 'Future Implementations', 'Access','Usage', 'Credits');
-
-    if (mainAnswers.feature) links.push('Feature');
-    if (mainAnswers.installation) links.push('Installation');
-    if (mainAnswers.badges) links.push('Badges');
-    if (mainAnswers.contribution) links.push('Contribution');
-    if (mainAnswers.license) links.push('License');
-
-    tableOfContentsSection = `\n## Table of Contents\n\n${links.map(link => `- [${link}](#${link.toLowerCase().replace(/ /g, '-')})`).join('\n')}`;
-
-    return ` # ${projectName}
+    return `# ${projectName}
 
 ## Your Task
 
-The purpose of the repository is to ${task}
+The purpose of the repository is to ${purpose}
 
-${descriptionSection}
+## Description
 
-${tableOfContentsSection}
+${description}
+
+## Table of Contents
 
 ## User Story
 
@@ -340,19 +282,37 @@ I WANT ${action}
 SO THAT ${because}
 \`\`\`
 
-${acceptanceSection}
+## Acceptance Criteria
 
-${futureSection}
+\`\`\`
+GIVEN ${acceptanceCriteria}
+${whenThenAnswers.map(answers => `WHEN ${answers.when}\nTHEN ${answers.then}`).join('\n')}
+\`\`\`
 
-${accessSection}
+## Future Implementations
+
+${improvementAnswers.map(answers => answers.improvements).join('\n')}
+
+## Access
+
+To access this site, please visit: ${link}
+
 
 ${installationSection}${badgeSection}${contributionSection}
 
-${featureSection}
 
-${usageSection}
+## Features
 
-${creditsSection}
+
+## Usage
+
+${usage}
+
+## Credits
+
+With thanks to:
+
+${addSources.map(source => source.credit).join('\n')}
 
 ${licenseSection}`;
 
