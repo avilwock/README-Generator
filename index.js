@@ -1,8 +1,12 @@
+//adds the inquirer and fs node.js modules
 const inquirer = require('inquirer');
 const fs = require('fs');
 
+//creates the variable mainAnswers
 let mainAnswers;
 
+//creates an async function named main prompt with types of input and confirm, adding questions
+//for the terminal to ask and giving each prompt a unique name
 async function mainPrompt() {
     const mainPrompt = [
     {
@@ -92,7 +96,8 @@ async function mainPrompt() {
     },
     
 ];
-
+    //this creates an await prompt that interacts differently depending on whether the
+    //prompt was confirmed or not in the terminal
     mainAnswers = await inquirer.prompt(mainPrompt);
 
     if (mainAnswers.tableOfContents) {
@@ -171,6 +176,8 @@ async function mainPrompt() {
 
 }
 
+//This creates an async function of repeatPrompt. It allows for the same two questions to be
+//repeated one right after the other
 async function repeatPrompt() {
     const answersArray = [];
     
@@ -193,6 +200,7 @@ async function repeatPrompt() {
         },
     ];
     
+    //this pushes the prompt answers to be nested one after the other
     const repeatAnswers = await inquirer.prompt(nestedPrompts);
     answersArray.push(repeatAnswers);
 
@@ -200,13 +208,14 @@ async function repeatPrompt() {
         await ask();
     } 
 }
-
+//this calls for the question to be repeated
 await ask();
 
 console.log('Answers:', answersArray);
 return answersArray;
 }
 
+//this creates a function to ask for credits
 async function credits () {
     const creditsArray = [];
 
@@ -237,6 +246,7 @@ await ask();
 return creditsArray;
 }
 
+//this creates a function to repeat the question for improvements
 async function bulletPoints () {
 
     const improvementsArray = [];
@@ -270,7 +280,8 @@ return improvementsArray;
 
 }
 
-async function run() {
+//this runs the program
+async function init() {
     const mainAnswers = await mainPrompt();
     console.log('Main Answers:', mainAnswers);
 
@@ -280,14 +291,16 @@ async function run() {
     // const optionalAnswers = await optionalSections();
 
     const readmeContent = generateREADME(mainAnswers, whenThenAnswers, improvementAnswers, addSources);
-    fs.writeFile('README.md', readmeContent, (err) =>
+    fs.writeFile('README-test.md', readmeContent, (err) =>
     err ? console.log(err): console.log('Success')
     );
 
 }
- run();
+ init();
 
-const generateREADME = ({ projectName, task, reason, because, action, acceptanceCriteria, description, link, usage, tableOfContentsText, featureText, question, test, licenseText}, whenThenAnswers, improvementAnswers, addSources) => {
+ //this creates the readme, with the specified variables listed.
+ //this also makes sure that the confirm functions will be asked and only populate if the user says yes
+const generateREADME = ({ projectName, task, reason, because, action, acceptanceCriteria, description, link, usage, tableOfContentsText, featureText, question, testText, licenseText}, whenThenAnswers, improvementAnswers, addSources) => {
 
     let badgeIcon ='';
     if (licenseText) {
@@ -316,15 +329,16 @@ const generateREADME = ({ projectName, task, reason, because, action, acceptance
     }
 
     let featureSection = '';
-    if (mainAnswers.feature) {
+    if (featureText) {
         featureSection = `\n## Feature\n\nAdditional Features: ${mainAnswers.featureText || ''}`;
     }
 
     let testSection = '';
-    if (mainAnswers.test) {
+    if (testText) {
         testSection = `\n## Test\n\n${mainAnswers.testText || ''}`;
     }
 
+    // These variables control what is populated into the template
     const descriptionSection = `\n## Description\n\n${description}`;
     
     const acceptanceSection = `## Acceptance Criteria\n\n\`\`\`\nGIVEN ${acceptanceCriteria}\n${whenThenAnswers.map(answers => `WHEN ${answers.when}\nTHEN ${answers.then}`).join('\n')}\n\`\`\``;
@@ -339,6 +353,7 @@ const generateREADME = ({ projectName, task, reason, because, action, acceptance
     
     const creditsSection = `## Credits\n\nWith thanks to:\n\n${addSources.map(source => source.credit).join('\n\n')}`;
 
+    //This ensures that the table of contents information is populated within the README document with links to the location within the document
     let links = [];
     if (tableOfContentsText) {
         links = links.concat(tableOfContentsText.split('\n').map(line => line.trim()));
@@ -357,6 +372,7 @@ const generateREADME = ({ projectName, task, reason, because, action, acceptance
 
     tableOfContentsSection = `\n## Table of Contents\n\n${links.map(link => `- [${link}](#${link.toLowerCase().replace(/ /g, '-')})`).join('\n')}`;
     
+    // This is the start of the template
     return ` # ${projectName}   ${badgeIcon}
 
 
