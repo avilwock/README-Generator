@@ -34,11 +34,6 @@ async function mainPrompt() {
         type: 'input',
         message: 'so that ',
         name: 'because',
-    },
-    {
-        type: 'input',
-        message: 'The purpose of this repository is to ',
-        name: 'acceptanceCriteria',
     }, 
     {
         type: 'input',
@@ -49,6 +44,11 @@ async function mainPrompt() {
         type: 'input',
         message: 'How do you use this program?',
         name: 'usage',
+    },
+    {
+        type: 'input',
+        message: 'Please enter your github username',
+        name: 'question',
     },
     {
         type: 'confirm',
@@ -77,8 +77,18 @@ async function mainPrompt() {
     },
     {
         type: 'confirm',
+        message: 'Would you like to include a test section?',
+        name: 'test',
+    },
+    {
+        type: 'confirm',
         message: 'Would you like to add a table of contents?',
         name: 'tableOfContents',
+    },
+    {
+        type: 'input',
+        message: 'The purpose of this repository is to: GIVEN ',
+        name: 'acceptanceCriteria',
     },
     
 ];
@@ -144,6 +154,17 @@ async function mainPrompt() {
             },
         ])
         mainAnswers.featureText = featureText.featureText;
+    }
+
+    if (mainAnswers.test) {
+        const testText = await inquirer.prompt([
+            {
+                type: 'input',
+                message: 'Please explain how tests can be performed with examples',
+                name: 'testText',
+            },
+        ])
+        mainAnswers.testText = testText.testText;
     }
 
     return mainAnswers;
@@ -266,9 +287,15 @@ async function run() {
 }
  run();
 
-const generateREADME = ({ projectName, task, reason, because, action, acceptanceCriteria, description, link, usage, tableOfContentsText, feature}, whenThenAnswers, improvementAnswers, addSources) => {
+const generateREADME = ({ projectName, task, reason, because, action, acceptanceCriteria, description, link, usage, tableOfContentsText, featureText, question, test, licenseText}, whenThenAnswers, improvementAnswers, addSources) => {
 
-      let installationSection = '';
+    let badgeIcon ='';
+    if (licenseText) {
+        const badgeIconURL = `https://img.shields.io/badge/license-${encodeURIComponent(licenseText)}-blue`;
+        badgeIcon = `![License](${badgeIconURL})`
+    } 
+    
+    let installationSection = '';
     if (mainAnswers.installationText) {
         installationSection = `\n## Installation\n\n${mainAnswers.installationText || ''}`;
     }
@@ -290,22 +317,27 @@ const generateREADME = ({ projectName, task, reason, because, action, acceptance
 
     let featureSection = '';
     if (mainAnswers.feature) {
-        featureSection = `\n## Feature\n\nAdditional Features: ${feature || ''}`;
+        featureSection = `\n## Feature\n\nAdditional Features: ${mainAnswers.featureText || ''}`;
+    }
+
+    let testSection = '';
+    if (mainAnswers.test) {
+        testSection = `\n## Test\n\n${mainAnswers.testText || ''}`;
     }
 
     const descriptionSection = `\n## Description\n\n${description}`;
     
     const acceptanceSection = `## Acceptance Criteria\n\n\`\`\`\nGIVEN ${acceptanceCriteria}\n${whenThenAnswers.map(answers => `WHEN ${answers.when}\nTHEN ${answers.then}`).join('\n')}\n\`\`\``;
 
-    const futureSection = `## Future Implementations\n\n${improvementAnswers.map(answers => answers.improvements).join('')}`;
+    const futureSection = `## Future Implementations\n\n${improvementAnswers.map(answers => answers.improvements).join('\n\n')}`;
 
     const accessSection = `## Access\n\nTo access this site, please visit: ${link}`;
 
-   // const featureSection = `## Feature\n\nAdditional Features: ${feature}`;
+    const questionSection = `## Questions\n\nFor any questions, please visit: https://github.com/${question}`;
     
     const usageSection = `## Usage\n\nTo use this repository: ${usage}`;
     
-    const creditsSection = `## Credits\n\nWith thanks to:\n\n${addSources.map(source => source.credit).join('\n')}`;
+    const creditsSection = `## Credits\n\nWith thanks to:\n\n${addSources.map(source => source.credit).join('\n\n')}`;
 
     let links = [];
     if (tableOfContentsText) {
@@ -319,14 +351,18 @@ const generateREADME = ({ projectName, task, reason, because, action, acceptance
     if (mainAnswers.badges) links.push('Badges');
     if (mainAnswers.contribution) links.push('Contribution');
     if (mainAnswers.license) links.push('License');
+    if (mainAnswers.test) links.push('Test')
+
+    let tableOfContentsSection;
 
     tableOfContentsSection = `\n## Table of Contents\n\n${links.map(link => `- [${link}](#${link.toLowerCase().replace(/ /g, '-')})`).join('\n')}`;
+    
+    return ` # ${projectName}   ${badgeIcon}
 
-    return ` # ${projectName}
 
 ## Your Task
 
-The purpose of the repository is to ${task}
+${task}
 
 ${descriptionSection}
 
@@ -352,7 +388,11 @@ ${featureSection}
 
 ${usageSection}
 
+${testSection}
+
 ${creditsSection}
+
+${questionSection}
 
 ${licenseSection}`;
 

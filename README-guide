@@ -59,9 +59,29 @@ To access this site, please visit: http://www.github.com/avilwock/README-Generat
 
 To use this repository: To use this program, open up the integrated terminal using the index.js file. Type in "node index" and then start answering the questions that appear on the screen.
 
+![alt text](<Images/README-Generator Image 1.png>) ![alt text](<Images/README-Generator Image 2.png>) ![alt text](<Images/README-Generator Image 3.png>)
+
+https://drive.google.com/file/d/1NbJWMw9JL2W4dAFNqFoB9YZgvPLIYutE/view?usp=sharing
+
 ## Credits
 
 With thanks to:
+
+https://stackoverflow.com/questions/66958602/how-to-write-special-characters-in-template-literals
+
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+
+https://www.clouddefense.ai/code/javascript/example/inquirer
+
+https://www.tabnine.com/code/javascript/functions/inquirer/Inquirer/prompt
+
+https://www.reddit.com/r/node/comments/9q3chw/looping_inquirerjs_prompts/
+
+https://snyk.io/advisor/npm-package/inquirer/functions/inquirer.prompt
+
+https://www.npmjs.com/package/inquirer
+
+Logan Garland, Coding Bootcamp, University of Irvine California
 
 ## License
 
