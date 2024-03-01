@@ -291,7 +291,7 @@ async function init() {
     // const optionalAnswers = await optionalSections();
 
     const readmeContent = generateREADME(mainAnswers, whenThenAnswers, improvementAnswers, addSources);
-    fs.writeFile('README-test.md', readmeContent, (err) =>
+    fs.writeFile('README-Generated.md', readmeContent, (err) =>
     err ? console.log(err): console.log('Success')
     );
 
